@@ -2,6 +2,21 @@ if(COMMAND toolchain_save_config)
   return() # prevent recursive call
 endif()
 
+# unset(CMAKE_CXX_FLAGS)
+set(SET_CMAKE_CXX_FLAGS_FORCE "ON")
+
+# message(STATUS "CMAKE_SHARED_LINKER_FLAGS --> ${CMAKE_SHARED_LINKER_FLAGS}")
+# message(STATUS "CMAKE_SHARED_LINKER_FLAGS_RELEASE --> ${CMAKE_SHARED_LINKER_FLAGS_RELEASE}")
+
+set(CMAKE_CXX_COMPILER /home/manu/softwares/gcc-buildroot-9.3.0-2020.03-x86_64_aarch64-rockchip-linux-gnu/bin/aarch64-rockchip-linux-gnu-c++)
+set(CMAKE_C_COMPILER   /home/manu/softwares/gcc-buildroot-9.3.0-2020.03-x86_64_aarch64-rockchip-linux-gnu/bin/aarch64-rockchip-linux-gnu-gcc)
+SET(CMAKE_LINKER /home/manu/softwares/gcc-buildroot-9.3.0-2020.03-x86_64_aarch64-rockchip-linux-gnu/bin/aarch64-rockchip-linux-gnu-ld)
+SET(CMAKE_AR /home/manu/softwares/gcc-buildroot-9.3.0-2020.03-x86_64_aarch64-rockchip-linux-gnu/bin/aarch64-rockchip-linux-gnu-ar CACHE FILEPATH "Archiver")
+
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+
 set(CMAKE_SYSTEM_NAME Linux)
 set(CMAKE_SYSTEM_VERSION 1)
 if(NOT DEFINED CMAKE_SYSTEM_PROCESSOR)
@@ -48,7 +63,8 @@ if(NOT DEFINED ARM_LINUX_SYSROOT AND DEFINED GNU_MACHINE)
   set(ARM_LINUX_SYSROOT /usr/${GNU_MACHINE}${FLOAT_ABI_SUFFIX})
 endif()
 
-if(NOT DEFINED CMAKE_CXX_FLAGS)
+if(NOT DEFINED CMAKE_CXX_FLAGS OR DEFINED SET_CMAKE_CXX_FLAGS_FORCE)
+  message(STATUS "if(NOT DEFINED CMAKE_CXX_FLAGS OR DEFINED SET_CMAKE_CXX_FLAGS_FORCE)")
   set(CMAKE_CXX_FLAGS           "" CACHE INTERNAL "")
   set(CMAKE_C_FLAGS             "" CACHE INTERNAL "")
   set(CMAKE_SHARED_LINKER_FLAGS "" CACHE INTERNAL "")
@@ -65,13 +81,13 @@ if(NOT DEFINED CMAKE_CXX_FLAGS)
   if(CMAKE_SYSTEM_PROCESSOR STREQUAL arm)
     set(ARM_LINKER_FLAGS "-Wl,--fix-cortex-a8 -Wl,--no-undefined -Wl,--gc-sections -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now")
   elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL aarch64)
-    set(ARM_LINKER_FLAGS "-Wl,--no-undefined -Wl,--gc-sections -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now")
+    set(ARM_LINKER_FLAGS "-Wl,--no-undefined -Wl,--gc-sections -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now -Wl,-rpath-link /home/manu/nfs/ffmpeg_install/lib -Wl,-rpath-link /home/manu/nfs/zlib_install/lib -Wl,-rpath-link /home/manu/nfs/x264_install/lib -Wl,-rpath-link /home/manu/nfs/xvidcore_install/lib")
   endif()
   set(CMAKE_SHARED_LINKER_FLAGS "${ARM_LINKER_FLAGS} ${CMAKE_SHARED_LINKER_FLAGS}")
   set(CMAKE_MODULE_LINKER_FLAGS "${ARM_LINKER_FLAGS} ${CMAKE_MODULE_LINKER_FLAGS}")
   set(CMAKE_EXE_LINKER_FLAGS    "${ARM_LINKER_FLAGS} ${CMAKE_EXE_LINKER_FLAGS}")
 else()
-  #message(WARNING "CMAKE_CXX_FLAGS='${CMAKE_CXX_FLAGS}' is defined")
+  # message(WARNING "CMAKE_CXX_FLAGS='${CMAKE_CXX_FLAGS}' is defined")
 endif()
 
 if(USE_NEON)
@@ -95,3 +111,6 @@ set(TOOLCHAIN_CONFIG_VARS ${TOOLCHAIN_CONFIG_VARS}
     CUDA_TOOLKIT_ROOT_DIR
 )
 toolchain_save_config()
+
+# message(STATUS "CMAKE_SHARED_LINKER_FLAGS --> ${CMAKE_SHARED_LINKER_FLAGS}")
+# message(STATUS "CMAKE_SHARED_LINKER_FLAGS_RELEASE --> ${CMAKE_SHARED_LINKER_FLAGS_RELEASE}")

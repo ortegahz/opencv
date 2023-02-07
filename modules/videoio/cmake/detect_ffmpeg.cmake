@@ -3,6 +3,7 @@ OCV_OPTION(OPENCV_FFMPEG_ENABLE_LIBAVDEVICE "Include FFMPEG/libavdevice library 
   VISIBLE_IF WITH_FFMPEG)
 
 if(NOT HAVE_FFMPEG AND OPENCV_FFMPEG_USE_FIND_PACKAGE)
+  message(STATUS "if(NOT HAVE_FFMPEG AND OPENCV_FFMPEG_USE_FIND_PACKAGE)")
   if(OPENCV_FFMPEG_USE_FIND_PACKAGE STREQUAL "1" OR OPENCV_FFMPEG_USE_FIND_PACKAGE STREQUAL "ON")
     set(OPENCV_FFMPEG_USE_FIND_PACKAGE "FFMPEG")
   endif()
@@ -25,8 +26,10 @@ endif()
 set(_required_ffmpeg_libraries libavcodec libavformat libavutil libswscale)
 set(_used_ffmpeg_libraries ${_required_ffmpeg_libraries})
 if(NOT HAVE_FFMPEG AND PKG_CONFIG_FOUND)
+  message(STATUS "if(NOT HAVE_FFMPEG AND PKG_CONFIG_FOUND)")
   ocv_check_modules(FFMPEG libavcodec libavformat libavutil libswscale)
   if(FFMPEG_FOUND)
+    message(STATUS "FFMPEG_FOUND")
     ocv_check_modules(FFMPEG_libavresample libavresample) # optional
     if(FFMPEG_libavresample_FOUND)
       list(APPEND FFMPEG_LIBRARIES ${FFMPEG_libavresample_LIBRARIES})
@@ -40,7 +43,9 @@ if(NOT HAVE_FFMPEG AND PKG_CONFIG_FOUND)
       endif()
     endif()
     set(HAVE_FFMPEG TRUE)
+    message(STATUS "HAVE_FFMPEG --> ${HAVE_FFMPEG}")
   else()
+    message(STATUS "else()")
     set(_missing_ffmpeg_libraries "")
     foreach (ffmpeg_lib ${_required_ffmpeg_libraries})
       if (NOT FFMPEG_${ffmpeg_lib}_FOUND)
@@ -67,6 +72,7 @@ if(HAVE_FFMPEG AND NOT HAVE_FFMPEG_WRAPPER)
       message(STATUS "FFMPEG is disabled. Can't find suitable ${ffmpeg_lib} library"
               " (minimal ${_min_${ffmpeg_lib}_version}, found ${FFMPEG_${ffmpeg_lib}_VERSION}).")
       set(HAVE_FFMPEG FALSE)
+      message(STATUS "set(HAVE_FFMPEG FALSE) line 75")
     endif()
   endforeach()
   if(NOT HAVE_FFMPEG)
@@ -84,6 +90,8 @@ endif()
 #==================================
 
 if(HAVE_FFMPEG AND NOT HAVE_FFMPEG_WRAPPER AND NOT OPENCV_FFMPEG_SKIP_BUILD_CHECK)
+  message(STATUS "FFMPEG_INCLUDE_DIRS --> ${FFMPEG_INCLUDE_DIRS}")
+  message(STATUS "FFMPEG_LIBRARIES --> ${FFMPEG_LIBRARIES}")
   try_compile(__VALID_FFMPEG
       "${OpenCV_BINARY_DIR}"
       "${OpenCV_SOURCE_DIR}/cmake/checks/ffmpeg_test.cpp"
@@ -92,9 +100,10 @@ if(HAVE_FFMPEG AND NOT HAVE_FFMPEG_WRAPPER AND NOT OPENCV_FFMPEG_SKIP_BUILD_CHEC
       OUTPUT_VARIABLE TRY_OUT
   )
   if(NOT __VALID_FFMPEG)
-    # message(FATAL_ERROR "FFMPEG: test check build log:\n${TRY_OUT}")
+    message(FATAL_ERROR "FFMPEG: test check build log:\n${TRY_OUT}")
     message(STATUS "WARNING: Can't build ffmpeg test code")
     set(HAVE_FFMPEG FALSE)
+    message(STATUS "set(HAVE_FFMPEG FALSE) line 104")
   endif()
 endif()
 
